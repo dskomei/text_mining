@@ -161,10 +161,12 @@ def get_bag_of_words(splited_sentences, n_word=None, save_file_name=None, save_d
     #  出現回数が多い順に番号をふる
     word_dicts = dict([[key[0], i] for key, i in zip(word_and_count.most_common(n_word), range(n_word))])
 
-    #  各文章の単語を出現回数ランキング番号に変換する
+    #  各文の単語を出現回数ランキング番号に変換する
     word_numbers = [[word_dicts[word] for word in words if word_dicts.get(word, False)] for words in splited_sentences]
+    cut_splited_senteces = [[word for word in words if word_dicts.get(word, False)] for words in splited_sentences]
+    cut_splited_senteces = [words for words in cut_splited_senteces if len(words) > 0]
 
-    # 行数：文章数、列数：単語個数に対応している
+    # 行数：文の数、列数：単語個数に対応している
     bag_of_words = np.zeros((len(splited_sentences), n_word))
 
     # それぞれの文で出現する単語に頻出回数ランキングの番号の列に1を代入
@@ -182,7 +184,7 @@ def get_bag_of_words(splited_sentences, n_word=None, save_file_name=None, save_d
         #  行列化が完了したデータを保存
         np.save(save_dir_path.joinpath(save_file_name), bag_of_words)
 
-    return bag_of_words
+    return bag_of_words, cut_splited_senteces
 
 
 if __name__ == '__main__':
@@ -211,7 +213,7 @@ if __name__ == '__main__':
     n_word = len(word_and_count)
     words, values = split_word_and_count(word_and_count=word_and_count, n_word=n_word)
     print(word_and_count)
-    print('文章数：{}, 単語数：{}'.format(len(splited_sentences), n_word))
+    print('文の数：{}, 単語数：{}'.format(len(splited_sentences), n_word))
 
     #  出現回数ごとの単語数を集計
     df = pd.DataFrame(word_and_count.most_common(n_word), columns=['word', 'count'])
@@ -241,10 +243,14 @@ if __name__ == '__main__':
     #  単語数を制限
     n_word = int(n_word * (1 - df_word_count['cumsum_rate'][2]))
 
-    bag_of_words = get_bag_of_words(splited_sentences=splited_sentences,
-                                    n_word=n_word,
-                                    save_file_name='bag_of_words.npy',
-                                    save_dir_path=data_dir_path)
+    bag_of_words, cut_splited_sentences = get_bag_of_words(splited_sentences=splited_sentences,
+                                                           n_word=n_word,
+                                                           save_file_name='bag_of_words.npy',
+                                                           save_dir_path=data_dir_path)
+
+    #  出現回数による条件を満たした単語群の出力
+    output_file = [','.join(sentence) + '\n' for sentence in cut_splited_sentences]
+    write_data(data=output_file, file_name=file_name.replace('.txt', '_cut_splited_word.txt'), dir_path=data_dir_path)
 
     #  アソシエーション分析のためのデータファイルを作成
     output_file = [','.join(sentence)+'\n' for sentence in splited_sentences]
