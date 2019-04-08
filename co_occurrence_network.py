@@ -220,10 +220,10 @@ if __name__ == '__main__':
     #  文内の単語が1語しかない場合は削除
     sentences = [sentence for sentence in sentences if len(sentence) > 1]
 
+    #  データの調査のための関数
     experiment(base_file_name=base_file_name, sentences=sentences)
 
-    plt.show()
-    exit()
+
     #  共起ネットワーク構築の実行
     co_occurrence_network(sentences,
                           n_word_lower=150,
