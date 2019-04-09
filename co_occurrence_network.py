@@ -18,7 +18,7 @@ if not result_dir_path.exists():
 ##  共起ネットワークを表示する関数
 def plot_network(data,edge_threshold=0., fig_size=(15, 15), file_name=None, dir_path=None):
 
-    nodes = list(set(data['node1'] + data['node2']))
+    nodes = list(set(data['node1'].tolist()+data['node2'].tolist()))
 
     G = nx.Graph()
     #  頂点の追加
